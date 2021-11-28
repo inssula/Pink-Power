@@ -14,10 +14,10 @@ BROKER_UNAME = 'student_2021'
 BROKER_PASSWD = 'pivotecepomqtt'
 TOPIC = 'ite/#'
 
-
-test = []
+# Team name
 raw = ['black','blue','green','red','pink']
-
+# All info
+data = {}
 
 class MQTT():
 
@@ -34,25 +34,26 @@ class MQTT():
         #print(msg.topic, msg.qos, msg.payload)
 
     def save(self, topic, mes):
-        print(topic ,mes)
+        print(topic ,mes) # mes = byte
 
         for i in raw:
-
             if topic == ('ite/' + i):
-                app.send_ws_message(message=mes.decode('utf-8'))
-                test.append(mes.decode('utf-8'))
-
-                if len(test) >= 11:
-                    del test[0]
+                message = mes.decode('utf-8') # str
+                message = json.loads(message) # dict
+                
+                if i not in data.keys():
+                    data[i] = {'created_on': [], 'temperature': []}
+                data[i]['created_on'].append(message['created_on'])
+                data[i]['temperature'].append(message['temperature'])
+                
+                if len(data[i]['created_on']) >= 11: # amount of data save
+                    del data[i]['created_on'][0]
+                    del data[i]['temperature'][0]
+                    
+                app.send_ws_message(message=data)
 
     def on_disconnect(self, client, userdata, rc):
         print('MQTT Client: Disconnected with result code qos:', rc)
-
-
-
-class TextHandler(RequestHandler):
-    def get(self):
-        self.write(test[-1])
 
 
 
@@ -88,7 +89,6 @@ class WebApp(Application):
         self.ws_clients = []
 
         handlers = [
-            (r"/text", TextHandler), 
             (r"/", MainHandler), 
             (r"/websocket", WSHandler, {"app": self}),
             (r'/(.*)', StaticFileHandler, {'path': dirname(__file__)})
@@ -101,7 +101,7 @@ class WebApp(Application):
     def send_ws_message(self, message):
         for client in self.ws_clients:
             try:
-                iol.spawn_callback(client.write_message, json.loads(message))
+                iol.spawn_callback(client.write_message, message)
             except:
                 iol.spawn_callback(client.write_message, json.dumps(message))
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     t.start()
 
     app = WebApp()
-    app.listen(8880)
+    app.listen(8880) # Port
 
     iol = IOLoop.current()
     iol.start()
