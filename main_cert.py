@@ -201,9 +201,9 @@ if __name__ == "__main__":
 
     app = WebApp()
     http_server = tornado.httpserver.HTTPServer(app, ssl_options={
-        "certfile": "/home/varabyou/certificate/cert.pem",
-        "keyfile": "/home/varabyou/certificate/key.pem",
-        "ca_certs": "/home/varabyou/certificate/fullchain.pem",
+        "certfile": "/home/certificate/cert.pem",
+        "keyfile": "/home/certificate/key.pem",
+        "ca_certs": "/home/certificate/fullchain.pem",
     })
     http_server.listen(443)
 
