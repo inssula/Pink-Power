@@ -9,6 +9,7 @@ from json import JSONDecodeError, dumps as json_dumps
 import paho.mqtt.client as mqtt
 import tornado.httpserver
 import json
+from recognize_handler import RecognizeImageHandler
 
 
 BROKER_IP = '147.228.124.230'
@@ -57,7 +58,6 @@ class MQTT():
         print('MQTT Client: Disconnected')
     
     def procedure(self, topic, mes):
-       # print(topic, mes) # mes = byte
 
         for i in raw:
             
@@ -76,7 +76,7 @@ class MQTT():
                 data[i]['created_on'].append(message['created_on'])
                 data[i]['temperature'].append(message['temperature'])
                 
-                if len(data[i]['created_on']) >= 11: # amount of data save
+                if len(data[i]['created_on']) >= 1441: # amount of data save
                     del data[i]['created_on'][0]
                     del data[i]['temperature'][0]
                        
@@ -91,20 +91,21 @@ class MQTT():
                 message = json.loads(message) # dict
             except:
                 print("Not the required data")
-            
+                
             createdTime = message['created_on'].replace(message['created_on'][-3:], time)
-            if (message['temperature'] > 0) and (message['temperature'] < 25): # from 0 C' to 25 C'
-                
-                body = {
-                        'createdOn': createdTime,
-                        'sensorUUID': sensorUUID,
-                        'temperature': message['temperature'],
-                        'status': 'OK'
-                        }
-                
+            body = {
+                   'createdOn': createdTime,
+                   'sensorUUID': sensorUUID,
+                   'temperature': message['temperature'],
+                   'status': 'OK'
+                   }
+            try:    
                 self.post_to(ep_data, body)
+                data['server'] = 1
+            except:
+                data['server'] = 0
                 
-            else:
+            if (message['temperature'] <= 0) or (message['temperature'] >= 25): # from 0 C' to 25 C'
                 
                 body = {
                         'createdOn': createdTime,
@@ -135,13 +136,48 @@ class MQTT():
         except HTTPError as http_err:
             print('E: HTTP error occurred:', http_err)
 
+class BaseHandler(tornado.web.RequestHandler):
+    def get_current_user(self):
+        return self.get_secure_cookie("faktborec4")
+
+class MainHandler(BaseHandler):
+
+	def prepare(self):
+		if self.request.protocol == 'http':
+			self.redirect('https://' + self.request.host, permanent=False)
+		if(not self.current_user):
+ 			self.redirect("/login")
 
 
-class MainHandler(RequestHandler):
-
-    def get(self):
-        self.render("index.html")
+	def get(self):	
+		self.render("index.html")
         
+class LoginHandler(BaseHandler):
+	def get(self):
+		if(not self.current_user):
+			self.render("login.html")
+		else:
+			self.redirect("/")
+
+	def post(self):
+		self.set_secure_cookie("faktborec4", self.get_argument("name"),expires_days = 0.0167)
+		self.redirect("/")
+
+class WeirdSitesHandler(BaseHandler):
+	def initialize(self,cesta):
+		self.cesta = cesta
+	def prepare(self):
+		if(not self.current_user):
+			self.redirect("/login")
+
+	def get(self,cesta):
+		try:
+			self.render(cesta)
+		except:
+			try:
+				self.render(cesta+".html")
+			except:
+				self.write("Don't you even try!")
         
 
 class WSHandler(WebSocketHandler):
@@ -153,6 +189,7 @@ class WSHandler(WebSocketHandler):
     def open(self):
         print('Webserver: Websocket opened.')
         self.write_message('Server ready.')
+        app.send_ws_message(message=data)
 
     def on_message(self, msg):
         print('Webserver: Received WS message:', msg)
@@ -171,10 +208,18 @@ class WebApp(Application):
         handlers = [
             (r"/", MainHandler), 
             (r"/websocket", WSHandler, {"app": self}),
-            (r'/(.*)', StaticFileHandler, {'path': dirname(__file__)})
+            (r"/login", LoginHandler),
+            (r"/recognize", RecognizeImageHandler),
+            (r'/(.*.js)', StaticFileHandler, {'path': dirname(__file__)            }),
+            (r'/(.*.ico)', StaticFileHandler, {'path': dirname(__file__)            }),
+            (r'/(.*.css)', StaticFileHandler, {'path': dirname(__file__)            }),
+            #(r'/(.*)', StaticFileHandler, {'path': dirname(__file__)}),
+            (r'/(.*)', WeirdSitesHandler,{"cesta" : __file__})
         ]
         settings = {
-            "debug": True
+            "debug": True,
+	    "cookie_secret":"bf49462ef61e192467cd479e27ca587cf899afc",
+	    "login_url":"/login",
         }
         Application.__init__(self, handlers, **settings)
 
@@ -199,11 +244,19 @@ if __name__ == "__main__":
     t = Thread(target=client.loop_forever, daemon=True)
     t.start()
 
+
+    application = tornado.web.Application([
+        (r'/', MainHandler)
+    ])
+    application.listen(80)
+
+
+
     app = WebApp()
     http_server = tornado.httpserver.HTTPServer(app, ssl_options={
-        "certfile": "/home/varabyou/certificate/cert.pem",
-        "keyfile": "/home/varabyou/certificate/key.pem",
-        "ca_certs": "/home/varabyou/certificate/fullchain.pem",
+        "certfile": "/home/certificate/cert.pem",
+        "keyfile": "/home/certificate/key.pem",
+        "ca_certs": "/home/certificate/fullchain.pem",
     })
     http_server.listen(443)
 

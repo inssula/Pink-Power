@@ -5,10 +5,10 @@
   --alerpink: hidden;
   --alerred: hidden;
   --alerblack-color: red;
-  --alerblue-color:  red;
-  --alergreen-color:  red;
+  --alerblue-color: red;
+  --alergreen-color: red;
   --alerpink-color: red;
-  --alerred-color: red;  
+  --alerred-color: red;
 }
 body {
   min-height: 100vh;
@@ -23,6 +23,26 @@ html {
 nav {
   display: flex;
   margin-top: 2rem;
+}
+
+.black-circle {
+  color: #3f3d3b;
+}
+
+.pink-circle {
+  color: #f6a6ff;
+}
+
+.green-circle {
+  color: #77dd77;
+}
+
+.red-circle {
+  color: #df1d2d;
+}
+
+.blue-circle {
+  color: #85e3ff;
 }
 
 #cst-srv-status {
@@ -43,7 +63,7 @@ nav {
 .tempNumber {
   font-size: 2.5rem;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .customer-server {
@@ -65,8 +85,8 @@ nav {
   margin-bottom: 1rem;
 }
 
-.bi-exclamation-triangle-fill{
-  color: black
+.bi-exclamation-triangle-fill {
+  color: black;
 }
 
 .tempNumber-black {
@@ -109,14 +129,6 @@ p.title-right {
 
 .page-header {
   margin: 2rem 0 0 4rem;
-}
-
-.active-Red {
-  border-color: red;
-}
-
-.nav-item > a.active > {
-  color: red;
 }
 
 main {
@@ -205,27 +217,6 @@ main {
   font-size: 30px;
 }
 
-.black {
-  fill: black;
-}
-
-.blue {
-  fill: blue;
-}
-
-.green {
-  fill: green;
-}
-
-.red {
-  fill: red;
-  color: red;
-}
-
-.pink {
-  fill: pink;
-}
-
 .container {
   padding-top: 2rem;
 }
@@ -282,31 +273,31 @@ main {
 }
 
 .card-1-black:hover {
-  border: 2px solid #010305;
+  border: 2px solid #3f3d3b;
   transform: scale(1.05);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
 }
 
 .card-1-blue:hover {
-  border: 2px solid blue;
+  border: 2px solid #85e3ff;
   transform: scale(1.05);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
 }
 
 .card-1-green:hover {
-  border: 2px solid green;
+  border: 2px solid #77dd77;
   transform: scale(1.05);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
 }
 
 .card-1-pink:hover {
-  border: 3px solid pink;
+  border: 3px solid #f6a6ff;
   transform: scale(1.05);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
 }
 
 .card-1-red:hover {
-  border: 2px solid red;
+  border: 2px solid #df1d2d;
   transform: scale(1.05);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
 }
@@ -316,23 +307,23 @@ main {
 }
 
 .card-1:hover {
-  border: 2px solid #010305;
+  border: 2px solid #3f3d3b;
 }
 
 .card-2:hover {
-  border: 2px solid blue;
+  border: 2px solid #85e3ff;
 }
 
 .card-3:hover {
-  border: 2px solid green;
+  border: 2px solid #77dd77;
 }
 
 .card-4:hover {
-  border: 3px solid pink;
+  border: 3px solid #f6a6ff;
 }
 
 .card-5:hover {
-  border: 2px solid red;
+  border: 2px solid #df1d2d;
 }
 
 .card h3 {

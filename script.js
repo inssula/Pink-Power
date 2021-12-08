@@ -4,11 +4,11 @@ var alldata
 var recognized = false
 
 function onBodyLoad() {
-    ws = new WebSocket('ws://localhost:8880/websocket')     // ws is a global variable (index.html)
+    ws = new WebSocket('wss://sulis15.zcu.cz:443/websocket')     // ws is a global variable (index.html)
     ws.onopen = onSocketOpen
     ws.onmessage = onSocketMessage
     ws.onclose = onSocketClose
-    setInterval(fn60sec, 120 * 1000);
+    //setInterval(fn60sec, 120 * 1000);
     
 
 }
@@ -20,6 +20,8 @@ String.prototype.replaceAtIndex = function(_index, _newValue) {
 function onSocketOpen() {
     console.log("WS client: Websocket opened.")
 }
+
+
 
 function onSocketMessage(message) {
     try {
@@ -54,13 +56,21 @@ function onSocketMessage(message) {
 }
 
 function prepareDataForGraph(data) {
-  var teams = []
-  var lastValues = []
-  for (var key in data) {
-    teams.push(key)
-    lastValues.push(data[key]['temperature'][data[key]['temperature'].length-1])
-  }
-  makeGraph(teams, lastValues)
+    var teams = []
+    var lastValues = []
+    for (var key in data) {
+        if (key == 'server') {
+            continue
+        }
+        teams.push(key)
+        try {
+            lastValues.push(data[key]['temperature'][data[key]['temperature'].length-1])
+        } catch (e) {
+            continue
+        }
+        
+    }
+    makeGraph(teams, lastValues)
 }
 
 window.addEventListener('resize',function(){
@@ -76,6 +86,23 @@ function fn60sec() {
     } catch (e) {
         return
     }
+}
+
+function getColor(pageName) {
+    if (pageName == 'blue') {
+        return '#85E3FF'
+    } else if (pageName == 'black') {
+        return '#3f3d3b'
+    } else if (pageName == 'green') {
+        return '#77dd77'
+    } else if (pageName == 'pink') {
+        return '#F6A6FF'
+    } else if (pageName == 'red') {
+        return '#DF1D2D'
+    } else {
+        return 'blue'
+    }
+
 }
 
 function makeGraph(teams, lastValues) {
@@ -105,7 +132,7 @@ function makeGraph(teams, lastValues) {
   }
   for (var team in teams) {
     option['xAxis']['data'].push(teams[team]);
-    option['series'][0]['data'].push({ value: lastValues[team], itemStyle: {color: teams[team]}})
+    option['series'][0]['data'].push({ value: lastValues[team], itemStyle: {color: getColor(teams[team])}})
     }
     Chart.setOption(option);
 }
@@ -183,7 +210,7 @@ function showYellowAlert(key) {
     }
     temperatures = alldata[key]['temperature']
     if (temperatures.length > 300) {
-        temperatures = temperatures.slice(Math.max(arr.length - 300, 1))
+        temperatures = temperatures.slice(Math.max(temperatures.length - 300, 1))
     }
     for (var i in temperatures) {
         if (temperatures[i] > 25 || temperatures[i] < 0) {
@@ -205,18 +232,18 @@ function redirectToTeamPage(color) {
 
 function showStatusOfCustomerServer(data){
     if (!(data.hasOwnProperty('server'))) {
-        document.getElementById("cst-srv-status").innerHTML("Offline")
+        document.getElementById("cst-srv-status").innerHTML ="Offline"
         document.getElementById("cst-srv-status").style.color = "red"
         return
     }
     
     if (data['server'] == 1) {
-        document.getElementById("cst-srv-status").innerHTML("Online")
+        document.getElementById("cst-srv-status").innerHTML ="Online"
         document.getElementById("cst-srv-status").style.color = "green"
         return
     }
 
-    document.getElementById("cst-srv-status").innerHTML("Offline")
+    document.getElementById("cst-srv-status").innerHTML ="Offline"
     document.getElementById("cst-srv-status").style.color = "red"
 
 }

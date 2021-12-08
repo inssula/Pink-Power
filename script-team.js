@@ -5,7 +5,7 @@ var pageName = window.location.pathname.split("/").pop();
 pageName = pageName.split('.')[0].toLowerCase()
 
 function onBodyLoad() {
-    ws = new WebSocket('ws://localhost:8880/websocket')     // ws is a global variable (index.html)
+    ws = new WebSocket('wss://sulis15.zcu.cz:443/websocket')     // ws is a global variable (index.html)
     ws.onopen = onSocketOpen
     ws.onmessage = onSocketMessage
     ws.onclose = onSocketClose
@@ -19,6 +19,7 @@ String.prototype.replaceAtIndex = function(_index, _newValue) {
 function onSocketOpen() {
     console.log("WS client: Websocket opened.")
 }
+
 
 function onSocketMessage(message) {
     try {
@@ -62,8 +63,24 @@ function fn60sec() {
     }
 }
 
+function getColor() {
+    if (pageName == 'blue') {
+        return '#85E3FF'
+    } else if (pageName == 'black') {
+        return '#3f3d3b'
+    } else if (pageName == 'green') {
+        return '#77dd77'
+    } else if (pageName == 'pink') {
+        return '#F6A6FF'
+    } else if (pageName == 'red') {
+        return '#DF1D2D'
+    }
+
+}
+
 function makeGraph(time,temperatures) {
     mrkPoint = []
+    colorPalete = getColor()
     for (var i in temperatures) {
         if (temperatures[i] > 25 || temperatures[i] < 0) {
             mrkPoint.push({'coord':[time[i],temperatures[i]]})
@@ -116,6 +133,7 @@ function makeGraph(time,temperatures) {
             {
                 name: 'temperature',
                 type: 'line',
+                color: colorPalete,
                 data: temperatures,
                 markPoint: {
                     itemStyle: {
@@ -125,7 +143,7 @@ function makeGraph(time,temperatures) {
                     symbolSize: 30,
                 },
                     markLine: {
-                        data: [{ type: 'average', name: 'Avg' }]
+                        data: [{ type: 'average', name: 'Avg' },{name: 'border',yAxis:0,itemStyle: {color: 'orange'}},{name: 'border',yAxis:25,itemStyle: {color: 'orange'}}]
                     }
                 
     
@@ -172,7 +190,7 @@ function showAverageTemperature(data) {
         avgTmp = avgTmp + data[pageName]['temperature'][temp]
     }
     avgTmp = avgTmp / data[pageName]['temperature'].length
-    document.getElementById("avgTempNumber-" + pageName).innerHTML = +avgTmp.toFixed(2)
+    document.getElementById("avgTempNumber-" + pageName).innerHTML = +avgTmp.toFixed(2) +"°C"
 }
 
 function showStatus(teamname, status) {
